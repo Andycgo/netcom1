@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NetCom | Gestión de productos</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="admin.html">NetCom Admin</a>
+
+    <ul class="navbar-nav ms-auto">
+      <li class="nav-item"><a class="nav-link" href="admin.html">Panel</a></li>
+      <li class="nav-item"><a class="nav-link active" href="admin-productos.html">Productos</a></li>
+      <li class="nav-item"><button class="btn btn-outline-light" onclick="cerrarSesion()">Cerrar sesión</button></li>
+    </ul>
+  </div>
+</nav>
+
+<main class="container my-5">
+  <h2>Gestión de productos</h2>
+
+  <div class="card p-4 shadow-sm my-4">
+    <h4>Agregar / editar producto</h4>
+
+    <input type="hidden" id="idProducto">
+
+    <div class="row g-3">
+      <div class="col-md-6">
+        <input id="nombreProducto" class="form-control" placeholder="Nombre del producto">
+      </div>
+
+      <div class="col-md-6">
+        <input id="marcaProducto" class="form-control" placeholder="Marca">
+      </div>
+
+      <div class="col-md-12">
+        <input id="descripcionProducto" class="form-control" placeholder="Descripción">
+      </div>
+
+      <div class="col-md-4">
+        <input id="precioProducto" type="number" class="form-control" placeholder="Precio">
+      </div>
+
+      <div class="col-md-4">
+        <input id="stockProducto" type="number" class="form-control" placeholder="Stock">
+      </div>
+
+      <div class="col-md-4">
+        <select id="categoriaProducto" class="form-select">
+          <option value="1">Portátiles</option>
+          <option value="2">Teléfonos</option>
+          <option value="3">Consolas</option>
+        </select>
+      </div>
+
+      <div class="col-md-12">
+        <input id="imagenProducto" class="form-control" placeholder="Ruta imagen: img/productos/producto.jpg">
+      </div>
+
+      <div class="col-md-12">
+        <button class="btn btn-primary" onclick="guardarProducto()">Guardar producto</button>
+        <button class="btn btn-secondary" onclick="limpiarFormulario()">Limpiar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-bordered align-middle">
+      <thead class="table-dark">
+        <tr>
+          <th>Producto</th>
+          <th>Categoría</th>
+          <th>Precio</th>
+          <th>Stock</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tablaProductos"></tbody>
+    </table>
+  </div>
+</main>
+
+<script src="js/auth.js"></script>
+<script src="js/products.js"></script>
+
+<script>
+  async function cargarTablaProductos() {
+    const usuario = JSON.parse(localStorage.getItem("usuarioNetcom"));
+
+    if (!usuario || (usuario.Rol || usuario.rol) !== "admin") {
+      alert("Acceso no autorizado.");
+      window.location.href = "login.html";
+      return;
+    }
+
+    await cargarProductosDesdeAPI();
+
+    document.getElementById("tablaProductos").innerHTML = products.map(p => {
+      const id = p.IdProducto || p.idProducto;
+      const nombre = p.NombreProducto || p.nombreProducto;
+      const categoria = p.NombreCategoria || p.nombreCategoria;
+      const precio = p.Precio || p.precio;
+      const stock = p.Stock ?? p.stock;
+      const estado = stock <= 0 ? "Agotado" : "Disponible";
+
+      return `
+        <tr>
+          <td>${nombre}</td>
+          <td>${categoria}</td>
+          <td>${formatoPrecio(precio)}</td>
+          <td>${stock}</td>
+          <td>${stock <= 0 ? `<span class="badge bg-danger">Agotado</span>` : `<span class="badge bg-success">Disponible</span>`}</td>
+          <td>
+            <button class="btn btn-warning btn-sm" onclick="editarProducto(${id})">Editar</button>
+            <button class="btn btn-danger btn-sm" onclick="eliminarProducto(${id})">Eliminar</button>
+          </td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  function editarProducto(id) {
+    const p = products.find(x => (x.IdProducto || x.idProducto) === id);
+
+    document.getElementById("idProducto").value = p.IdProducto || p.idProducto;
+    document.getElementById("nombreProducto").value = p.NombreProducto || p.nombreProducto;
+    document.getElementById("marcaProducto").value = p.Marca || p.marca;
+    document.getElementById("descripcionProducto").value = p.Descripcion || p.descripcion;
+    document.getElementById("precioProducto").value = p.Precio || p.precio;
+    document.getElementById("stockProducto").value = p.Stock ?? p.stock;
+    document.getElementById("categoriaProducto").value = p.IdCategoria || p.idCategoria;
+    document.getElementById("imagenProducto").value = p.Imagen || p.imagen;
+  }
+
+  async function guardarProducto() {
+  const producto = {
+    IdProducto: Number(document.getElementById("idProducto").value || 0),
+    NombreProducto: document.getElementById("nombreProducto").value.trim(),
+    Marca: document.getElementById("marcaProducto").value.trim(),
+    Descripcion: document.getElementById("descripcionProducto").value.trim(),
+    Precio: Number(document.getElementById("precioProducto").value),
+    Stock: Number(document.getElementById("stockProducto").value),
+    Imagen: document.getElementById("imagenProducto").value.trim(),
+    IdCategoria: Number(document.getElementById("categoriaProducto").value)
+  };
+
+  if (producto.NombreProducto === "") {
+    alert("El nombre del producto es obligatorio.");
+    return;
+  }
+
+  if (producto.Marca === "") {
+    alert("La marca es obligatoria.");
+    return;
+  }
+
+  if (producto.Descripcion === "") {
+    alert("La descripción es obligatoria.");
+    return;
+  }
+
+  if (!producto.Precio || producto.Precio <= 0) {
+    alert("El precio debe ser mayor que cero.");
+    return;
+  }
+
+  if (isNaN(producto.Stock) || producto.Stock < 0) {
+    alert("El stock no puede estar vacío ni ser negativo.");
+    return;
+  }
+
+  if (!producto.IdCategoria || producto.IdCategoria <= 0) {
+    alert("Debes seleccionar una categoría.");
+    return;
+  }
+
+  const metodo = producto.IdProducto > 0 ? "PUT" : "POST";
+
+  try {
+    const respuesta = await fetch(API_PRODUCTO, {
+      method: metodo,
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(producto)
+    });
+
+    if (respuesta.ok) {
+      alert("Producto guardado correctamente.");
+      limpiarFormulario();
+      cargarTablaProductos();
+    } else {
+      const errorTexto = await respuesta.text();
+      alert("No se pudo guardar el producto: " + errorTexto);
+    }
+  } catch (error) {
+    console.error(error);
+    alert("Error de conexión con la API de productos.");
+  }
+}
+
+  async function eliminarProducto(id) {
+    if (!confirm("¿Deseas eliminar este producto?")) return;
+
+    const respuesta = await fetch(`${API_PRODUCTO}/${id}`, {
+      method: "DELETE"
+    });
+
+    if (respuesta.ok) {
+      alert("Producto eliminado.");
+      cargarTablaProductos();
+    } else {
+      alert("No se pudo eliminar el producto.");
+    }
+  }
+
+  function limpiarFormulario() {
+    document.getElementById("idProducto").value = "";
+    document.getElementById("nombreProducto").value = "";
+    document.getElementById("marcaProducto").value = "";
+    document.getElementById("descripcionProducto").value = "";
+    document.getElementById("precioProducto").value = "";
+    document.getElementById("stockProducto").value = "";
+    document.getElementById("imagenProducto").value = "";
+  }
+
+  cargarTablaProductos();
+</script>
+
+</body>
+</html>

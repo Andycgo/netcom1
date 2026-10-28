@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NetCom | Carrito</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="index.html">NetCom</a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="menu">
+      <ul class="navbar-nav ms-auto align-items-lg-center">
+        <li class="nav-item d-flex align-items-center ms-lg-3 my-2 my-lg-0">
+  <button id="themeToggle" class="theme-toggle" type="button">
+    <span class="theme-toggle-track">
+      <span class="theme-icon theme-sun">☀</span>
+      <span class="theme-icon theme-moon">☾</span>
+      <span class="theme-toggle-thumb"></span>
+    </span>
+  </button>
+</li>
+        <li class="nav-item" id="zonaUsuario"></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<main class="container my-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Carrito de compras</h2>
+    <a href="productos.html" class="btn btn-outline-primary">Seguir comprando</a>
+  </div>
+
+  <div id="contenedorCarrito"></div>
+</main>
+
+<footer class="bg-dark text-white text-center py-3">
+  <p class="mb-0">© 2026 NetCom</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/products.js"></script>
+
+<script>
+  function mostrarCarrito() {
+  const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+  const contenedor = document.getElementById("contenedorCarrito");
+
+  if (carrito.length === 0) {
+    contenedor.innerHTML = `
+      <div class="alert alert-info">
+        El carrito está vacío. <a href="productos.html">Ir a productos</a>
+      </div>
+    `;
+    return;
+  }
+
+  let total = 0;
+
+  const filas = carrito.map(p => {
+    const nombre = p.nombre || p.name || "Producto sin nombre";
+    const categoria = p.categoria || p.category || "Sin categoría";
+    const precio = Number(p.precio || p.price || 0);
+    const cantidad = Number(p.cantidad || p.quantity || 1);
+    const subtotal = precio * cantidad;
+
+    total += subtotal;
+
+    return `
+      <tr>
+        <td>
+          <strong>${nombre}</strong><br>
+          <span class="text-muted">${categoria}</span>
+        </td>
+        <td>${formatoPrecio(precio)}</td>
+        <td>
+          <input 
+            type="number" 
+            class="form-control cantidad-input" 
+            min="1" 
+            value="${cantidad}" 
+            onchange="actualizarCantidad(${p.idProducto}, this.value)"
+          >
+        </td>
+        <td>${formatoPrecio(subtotal)}</td>
+        <td>
+          <button class="btn btn-danger btn-sm" onclick="eliminarDelCarrito(${p.idProducto})">
+            Eliminar
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  contenedor.innerHTML = `
+    <div class="table-responsive">
+      <table class="table table-bordered align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>Producto</th>
+            <th>Precio unitario</th>
+            <th>Cantidad</th>
+            <th>Subtotal</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filas}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card p-4 shadow-sm total-card ms-auto">
+      <h4>Total del carrito</h4>
+      <h2 class="text-primary">${formatoPrecio(total)}</h2>
+
+      <button class="btn btn-success mt-3" data-bs-toggle="modal" data-bs-target="#modalPago">
+        Finalizar compra
+      </button>
+
+      <button class="btn btn-outline-danger mt-2" onclick="vaciarCarrito()">
+        Vaciar carrito
+      </button>
+    </div>
+  `;
+}
+function actualizarCantidad(idProducto, cantidad) {
+  let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+
+  const producto = carrito.find(p => p.idProducto === idProducto);
+
+  if (producto) {
+    producto.cantidad = Number(cantidad);
+
+    if (producto.cantidad <= 0) {
+      carrito = carrito.filter(p => p.idProducto !== idProducto);
+    }
+
+    localStorage.setItem("carrito", JSON.stringify(carrito));
+    mostrarCarrito();
+  }
+}
+
+  function eliminarDelCarrito(id) {
+    let carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+    carrito = carrito.filter(p => p.id !== id);
+    localStorage.setItem("carrito", JSON.stringify(carrito));
+    mostrarCarrito();
+  }
+
+  function vaciarCarrito() {
+    localStorage.removeItem("carrito");
+    mostrarCarrito();
+  }
+
+  mostrarCarrito();
+</script>
+
+<script>
+  let compraCompletada = false;
+
+  function mostrarCamposPago() {
+    const metodo = document.getElementById("metodoPago").value;
+    const contenedor = document.getElementById("camposPago");
+
+    if (metodo === "nequi" || metodo === "daviplata") {
+      contenedor.innerHTML = `
+        <label class="form-label">Número de celular</label>
+        <input id="datoPago" class="form-control" placeholder="Ej: 3001234567">
+      `;
+    } else if (metodo === "pse") {
+      contenedor.innerHTML = `
+        <label class="form-label">Banco</label>
+        <select id="datoPago" class="form-select">
+          <option value="">Seleccione banco</option>
+          <option>Bancolombia</option>
+          <option>Davivienda</option>
+          <option>Banco de Bogotá</option>
+          <option>BBVA</option>
+        </select>
+      `;
+    } else if (metodo === "tarjeta") {
+      contenedor.innerHTML = `
+        <label class="form-label">Número de tarjeta</label>
+        <input id="datoPago" class="form-control mb-2" placeholder="0000 0000 0000 0000">
+
+        <label class="form-label">Fecha de vencimiento</label>
+        <input class="form-control mb-2" placeholder="MM/AA">
+
+        <label class="form-label">CVV</label>
+        <input class="form-control" placeholder="123">
+      `;
+    } else if (metodo === "contraentrega") {
+      contenedor.innerHTML = `
+        <label class="form-label">Dirección de entrega</label>
+        <input id="datoPago" class="form-control" placeholder="Dirección completa">
+      `;
+    } else {
+      contenedor.innerHTML = "";
+    }
+  }
+
+async function confirmarCompra() {
+  const metodo = document.getElementById("metodoPago").value;
+  const datoPago = document.getElementById("datoPago");
+  const usuario = JSON.parse(localStorage.getItem("usuarioNetcom"));
+  const carrito = JSON.parse(localStorage.getItem("carrito")) || [];
+
+  if (!usuario) {
+    alert("Debes iniciar sesión para finalizar la compra.");
+    window.location.href = "login.html";
+    return;
+  }
+
+  const rol = usuario.Rol || usuario.rol;
+
+  if (rol === "admin") {
+    alert("El administrador no puede realizar compras.");
+    return;
+  }
+
+  if (carrito.length === 0) {
+    alert("El carrito está vacío.");
+    return;
+  }
+
+  if (!metodo || (datoPago && datoPago.value.trim() === "")) {
+    alert("Completa la información del método de pago.");
+    return;
+  }
+
+  const idUsuario = usuario.IdUsuario || usuario.idUsuario;
+
+  const venta = {
+    IdUsuario: idUsuario,
+    MetodoPago: metodo,
+    DatoPago: datoPago ? datoPago.value.trim() : "",
+    Detalles: carrito.map(p => ({
+      IdProducto: p.idProducto || p.IdProducto || p.id,
+      Cantidad: p.cantidad || p.quantity || 1
+    }))
+  };
+
+  try {
+    const respuesta = await fetch("https://localhost:44301/api/venta", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(venta)
+    });
+
+    if (!respuesta.ok) {
+      const errorTexto = await respuesta.text();
+      alert("No se pudo registrar la venta: " + errorTexto);
+      return;
+    }
+
+    compraCompletada = true;
+
+    localStorage.removeItem("carrito");
+
+    const modal = bootstrap.Modal.getInstance(document.getElementById("modalPago"));
+    modal.hide();
+
+    document.getElementById("mensajeCompra").innerHTML = `
+      <div class="alert alert-success text-center shadow">
+        <h4>✅ Venta realizada</h4>
+        <p>La compra fue registrada correctamente en la base de datos.</p>
+      </div>
+    `;
+
+    setTimeout(() => {
+      window.location.href = "dashboard.html";
+    }, 2000);
+
+  } catch (error) {
+    console.error(error);
+    alert("Error de conexión con la API de ventas.");
+  }
+}
+  document.getElementById("modalPago").addEventListener("hidden.bs.modal", function () {
+    if (!compraCompletada) {
+      document.getElementById("mensajeCompra").innerHTML = `
+        <div class="alert alert-danger text-center shadow">
+          <h4>❌ Venta cancelada</h4>
+          <p>No se completó la información de pago.</p>
+        </div>
+      `;
+    }
+
+    compraCompletada = false;
+  });
+</script>
+
+<div class="modal fade" id="modalPago" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title">Finalizar compra</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <label class="form-label">Método de pago</label>
+        <select id="metodoPago" class="form-select mb-3" onchange="mostrarCamposPago()">
+          <option value="">Seleccione método de pago</option>
+          <option value="nequi">Nequi</option>
+          <option value="daviplata">Daviplata</option>
+          <option value="pse">PSE</option>
+          <option value="tarjeta">Tarjeta débito/crédito</option>
+          <option value="contraentrega">Pago contraentrega</option>
+        </select>
+
+        <div id="camposPago"></div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button class="btn btn-success" onclick="confirmarCompra()">Confirmar compra</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="mensajeCompra" class="position-fixed top-0 start-50 translate-middle-x mt-4 z-3"></div>
+
+<script src="js/auth.js"></script>
+<script src="js/session.js"></script>
+<script src="js/theme.js"></script>
+</body>
+</html>

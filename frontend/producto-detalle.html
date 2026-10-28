@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NetCom | Detalle del producto</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="index.html">NetCom</a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="menu">
+      <ul class="navbar-nav ms-auto align-items-lg-center">
+        <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
+        <li class="nav-item"><a class="nav-link" href="productos.html">Productos</a></li>
+        <li class="nav-item"><a class="nav-link" href="carrito.html">Carrito</a></li>
+        <li class="nav-item" id="menuCuenta">
+  <a class="nav-link" href="dashboard.html">Mi cuenta</a>
+</li>
+        <li class="nav-item d-flex align-items-center ms-lg-3 my-2 my-lg-0">
+  <button id="themeToggle" class="theme-toggle" type="button">
+    <span class="theme-toggle-track">
+      <span class="theme-icon theme-sun">☀</span>
+      <span class="theme-icon theme-moon">☾</span>
+      <span class="theme-toggle-thumb"></span>
+    </span>
+  </button>
+</li>
+        <li class="nav-item" id="zonaUsuario"></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<main class="container my-5">
+  <div id="detalleProducto"></div>
+
+  <section class="mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h3 class="fw-bold">Productos relacionados</h3>
+      <a href="productos.html" class="btn btn-outline-primary">Ver catálogo</a>
+    </div>
+
+    <div id="productosRelacionados" class="row g-4"></div>
+  </section>
+</main>
+
+<footer class="bg-dark text-white text-center py-3">
+  <p class="mb-0">© 2026 NetCom</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="js/auth.js"></script>
+<script src="js/session.js"></script>
+<script src="js/products.js"></script>
+
+<script>
+  let productoActual = null;
+
+  document.addEventListener("DOMContentLoaded", async function () {
+    await cargarDetalle();
+  });
+
+  async function cargarDetalle() {
+    const parametros = new URLSearchParams(window.location.search);
+    const id = Number(parametros.get("id"));
+
+    if (!id) {
+      mostrarError("No se encontró el producto solicitado.");
+      return;
+    }
+
+    try {
+      const respuesta = await fetch(`${API_PRODUCTO}/${id}`);
+
+      if (respuesta.ok) {
+        productoActual = await respuesta.json();
+      } else {
+        await cargarProductosDesdeAPI();
+        productoActual = products.find(p => obtenerId(p) === id);
+      }
+
+      if (!productoActual) {
+        mostrarError("El producto no existe o no está disponible.");
+        return;
+      }
+
+      products = [productoActual];
+
+      pintarDetalle(productoActual);
+
+      await cargarProductosDesdeAPI();
+      pintarRelacionados(productoActual);
+
+    } catch (error) {
+      console.error(error);
+      mostrarError("Error al cargar el detalle del producto.");
+    }
+  }
+
+  function mostrarError(mensaje) {
+    document.getElementById("detalleProducto").innerHTML = `
+      <div class="alert alert-danger">
+        ${mensaje}
+      </div>
+    `;
+  }
+
+  function obtenerId(p) {
+    return p.IdProducto || p.idProducto || p.id;
+  }
+
+  function obtenerNombre(p) {
+    return p.NombreProducto || p.nombreProducto || p.name || "Producto sin nombre";
+  }
+
+  function obtenerDescripcion(p) {
+    return p.Descripcion || p.descripcion || p.description || "";
+  }
+
+  function obtenerPrecio(p) {
+    return Number(p.Precio || p.precio || p.price || 0);
+  }
+
+  function obtenerStock(p) {
+    return Number(p.Stock ?? p.stock ?? 0);
+  }
+
+  function obtenerMarca(p) {
+    return p.Marca || p.marca || "";
+  }
+
+  function obtenerCategoria(p) {
+    return p.NombreCategoria || p.nombreCategoria || p.category || "Sin categoría";
+  }
+
+  function obtenerCategoriaNormalizada(p) {
+    if (typeof normalizarCategoria === "function") {
+      return normalizarCategoria(obtenerCategoria(p));
+    }
+
+    return obtenerCategoria(p).toLowerCase();
+  }
+
+  function imagenProducto(p) {
+    if (typeof obtenerImagenProducto === "function") {
+      return obtenerImagenProducto(p);
+    }
+
+    return p.Imagen || p.imagen || p.image || "https://via.placeholder.com/700x500?text=Producto";
+  }
+
+  function obtenerMetodosPago(p) {
+    if (Array.isArray(p.MetodosPago)) {
+      return p.MetodosPago;
+    }
+
+    if (Array.isArray(p.metodosPago)) {
+      return p.metodosPago;
+    }
+
+    if (typeof p.MetodosPago === "string") {
+      return p.MetodosPago.split(",").map(x => x.trim());
+    }
+
+    if (typeof p.metodosPago === "string") {
+      return p.metodosPago.split(",").map(x => x.trim());
+    }
+
+    return ["Nequi", "Daviplata", "PSE", "Tarjeta débito/crédito", "Pago contraentrega"];
+  }
+
+  function obtenerCaracteristicas(p) {
+    if (Array.isArray(p.Caracteristicas)) {
+      return p.Caracteristicas;
+    }
+
+    if (Array.isArray(p.caracteristicas)) {
+      return p.caracteristicas;
+    }
+
+    const descripcion = obtenerDescripcion(p);
+    const categoria = obtenerCategoriaNormalizada(p);
+    const nombre = obtenerNombre(p).toLowerCase();
+
+    if (descripcion) {
+      const desdeDescripcion = descripcion
+        .split(",")
+        .map(x => x.trim())
+        .filter(x => x.length > 0);
+
+      if (desdeDescripcion.length > 0) {
+        return desdeDescripcion;
+      }
+    }
+
+    if (categoria === "portatiles") {
+      return ["Procesador de alto rendimiento", "Memoria RAM optimizada", "Almacenamiento SSD", "Ideal para estudio, trabajo o gaming"];
+    }
+
+    if (categoria === "telefonos") {
+      return ["Pantalla de alta resolución", "Buena capacidad de almacenamiento", "Cámara avanzada", "Conectividad móvil"];
+    }
+
+    if (categoria === "consolas") {
+      return ["Sistema de videojuegos", "Almacenamiento interno", "Compatible con juegos actuales", "Entretenimiento en casa"];
+    }
+
+    return ["Producto tecnológico", "Disponible en NetCom", "Información actualizada"];
+  }
+
+  function pintarDetalle(p) {
+    const id = obtenerId(p);
+    const nombre = obtenerNombre(p);
+    const descripcion = obtenerDescripcion(p);
+    const precio = obtenerPrecio(p);
+    const stock = obtenerStock(p);
+    const marca = obtenerMarca(p);
+    const categoria = obtenerCategoria(p);
+    const imagen = imagenProducto(p);
+    const agotado = stock <= 0;
+    const metodosPago = obtenerMetodosPago(p);
+    const caracteristicas = obtenerCaracteristicas(p);
+
+    const usuario = JSON.parse(localStorage.getItem("usuarioNetcom"));
+    const rol = usuario ? (usuario.Rol || usuario.rol) : null;
+
+    let botonCompra = "";
+
+    if (rol === "admin") {
+      botonCompra = `<button class="btn btn-secondary btn-lg w-100" disabled>El administrador no puede comprar</button>`;
+    } else if (agotado) {
+      botonCompra = `<button class="btn btn-danger btn-lg w-100" disabled>Producto agotado</button>`;
+    } else {
+      botonCompra = `<button class="btn btn-primary btn-lg w-100" onclick="agregarCarrito(${id})">Agregar al carrito</button>`;
+    }
+
+    document.getElementById("detalleProducto").innerHTML = `
+      <div class="row g-5 align-items-start">
+
+        <div class="col-lg-6">
+          <div class="detail-image-box shadow-sm">
+            <img 
+              src="${imagen}" 
+              alt="${nombre}"
+              onerror="this.src='https://via.placeholder.com/700x500?text=Sin+Imagen'"
+            >
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="detail-info-box">
+            <span class="badge bg-secondary mb-2">${categoria}</span>
+
+            ${agotado ? `<span class="badge bg-danger mb-2 ms-2">Agotado</span>` : `<span class="badge bg-success mb-2 ms-2">Disponible</span>`}
+
+            <h1 class="fw-bold">${nombre}</h1>
+
+            <p class="text-muted mb-2">
+              Marca: <strong>${marca || "No especificada"}</strong>
+            </p>
+
+            <p class="detail-description">
+              ${descripcion || "Producto tecnológico disponible en NetCom."}
+            </p>
+
+            <div class="detail-price-box my-4">
+              <small class="text-muted">Precio</small>
+              <h2 class="text-primary fw-bold">${formatoPrecio(precio)}</h2>
+              <p class="mb-0 ${agotado ? 'text-danger' : 'text-success'}">
+                Stock disponible: <strong>${stock}</strong>
+              </p>
+            </div>
+
+            <div class="mb-4">
+              <h5 class="fw-bold">Métodos de pago disponibles</h5>
+
+              <div class="payment-list">
+                ${metodosPago.map(m => `<span>${m}</span>`).join("")}
+              </div>
+            </div>
+
+            <div class="d-grid gap-2 mb-4">
+              ${botonCompra}
+              <a href="carrito.html" class="btn btn-outline-primary btn-lg">
+                Ir al carrito
+              </a>
+            </div>
+
+            <div class="alert alert-info small">
+              Esta compra es simulada para el proyecto NetCom. El método de pago se selecciona al finalizar la compra.
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <section class="mt-5">
+        <div class="row g-4">
+          <div class="col-lg-7">
+            <div class="detail-section-card">
+              <h4 class="fw-bold">Características del producto</h4>
+
+              <div class="table-responsive mt-3">
+                <table class="table table-bordered">
+                  <tbody>
+                    ${caracteristicas.map((c, index) => `
+                      <tr>
+                        <th>Característica ${index + 1}</th>
+                        <td>${c}</td>
+                      </tr>
+                    `).join("")}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-5">
+            <div class="detail-section-card">
+              <h4 class="fw-bold">Información adicional</h4>
+
+              <ul class="list-unstyled mt-3">
+                <li class="mb-2">✅ Producto registrado en NetCom.</li>
+                <li class="mb-2">✅ Stock controlado desde inventario.</li>
+                <li class="mb-2">✅ Métodos de pago preparados para Colombia.</li>
+                <li class="mb-2">✅ Características listas para futura gestión por admin.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+    `;
+  }
+
+  function pintarRelacionados(producto) {
+    const categoriaActual = obtenerCategoriaNormalizada(producto);
+    const idActual = obtenerId(producto);
+
+    const relacionados = products
+      .filter(p => obtenerCategoriaNormalizada(p) === categoriaActual && obtenerId(p) !== idActual)
+      .slice(0, 4);
+
+    if (relacionados.length === 0) {
+      document.getElementById("productosRelacionados").innerHTML = `
+        <div class="col-12">
+          <div class="alert alert-info">No hay productos relacionados disponibles.</div>
+        </div>
+      `;
+      return;
+    }
+
+    document.getElementById("productosRelacionados").innerHTML = relacionados.map(p => {
+      const id = obtenerId(p);
+      const nombre = obtenerNombre(p);
+      const precio = obtenerPrecio(p);
+      const imagen = imagenProducto(p);
+      const stock = obtenerStock(p);
+
+      return `
+        <div class="col-md-3">
+          <div class="card h-100 product-card shadow-sm">
+            <img 
+              src="${imagen}" 
+              class="card-img-top" 
+              alt="${nombre}"
+              onerror="this.src='https://via.placeholder.com/400x250?text=Producto'"
+            >
+
+            <div class="card-body">
+              <h6>
+                <a href="producto-detalle.html?id=${id}" class="text-decoration-none">
+                  ${nombre}
+                </a>
+              </h6>
+
+              <p class="text-primary fw-bold">${formatoPrecio(precio)}</p>
+              <p class="small text-muted">Stock: ${stock}</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+</script>
+<script src="js/theme.js"></script>
+</body>
+</html>

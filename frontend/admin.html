@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NetCom | Panel Administrador</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="admin.html">NetCom Admin</a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuAdmin">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="menuAdmin">
+      <ul class="navbar-nav ms-auto align-items-lg-center">
+        <li class="nav-item"><a class="nav-link active" href="admin.html">Panel</a></li>
+        <li class="nav-item"><a class="nav-link" href="admin-productos.html">Gestionar productos</a></li>
+
+
+        <li class="nav-item">
+          <button class="btn btn-outline-light ms-lg-3" onclick="cerrarSesion()">Cerrar sesión</button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<main class="container my-5">
+  <div class="admin-header mb-4">
+    <span class="badge bg-primary mb-2">Administrador</span>
+    <h1 class="fw-bold">Panel de administración NetCom</h1>
+    <p class="text-muted mb-0">
+      Consulta estadísticas, usuarios, ventas, transacciones y genera reportes.
+    </p>
+  </div>
+
+  <ul class="nav nav-pills admin-tabs mb-4" id="adminTabs">
+    <li class="nav-item">
+      <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#tabResumen">
+        Resumen
+      </button>
+    </li>
+
+    <li class="nav-item">
+      <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tabUsuarios">
+        Usuarios
+      </button>
+    </li>
+
+    <li class="nav-item">
+      <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tabVentas">
+        Ventas
+      </button>
+    </li>
+
+    <li class="nav-item">
+      <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tabReportes">
+        Reportes
+      </button>
+    </li>
+  </ul>
+
+  <div class="tab-content">
+
+    <!-- RESUMEN -->
+    <section class="tab-pane fade show active" id="tabResumen">
+      <div class="row g-4 mb-4">
+        <div class="col-md-4">
+          <div class="admin-stat-card">
+            <span>Total productos</span>
+            <h2 id="totalProductos">0</h2>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="admin-stat-card">
+            <span>Productos agotados</span>
+            <h2 id="productosAgotados">0</h2>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="admin-stat-card">
+            <span>Stock total</span>
+            <h2 id="stockTotal">0</h2>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="admin-stat-card">
+            <span>Usuarios registrados</span>
+            <h2 id="usuariosRegistrados">0</h2>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="admin-stat-card">
+            <span>Ventas realizadas</span>
+            <h2 id="ventasRealizadas">0</h2>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="admin-stat-card">
+            <span>Total recaudado</span>
+            <h2 id="totalRecaudado">$0</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+          <div>
+            <h4 class="fw-bold mb-1">Gráfica de ventas</h4>
+            <p class="text-muted mb-0">
+              Selecciona un usuario para ver sus ventas o deja “Todos” para ver ventas generales.
+            </p>
+          </div>
+
+          <select id="usuarioGrafica" class="form-select admin-select" onchange="cargarGraficaVentas()">
+            <option value="">Todos los usuarios</option>
+          </select>
+        </div>
+
+        <canvas id="graficaVentas" height="110"></canvas>
+      </div>
+    </section>
+
+    <!-- USUARIOS -->
+    <section class="tab-pane fade" id="tabUsuarios">
+      <div class="admin-card">
+        <h4 class="fw-bold mb-3">Usuarios registrados</h4>
+
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle">
+            <thead class="table-dark">
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Rol</th>
+                <th>Registro</th>
+                <th>Compras</th>
+                <th>Total comprado</th>
+                <th>Última compra</th>
+              </tr>
+            </thead>
+            <tbody id="tablaUsuarios"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- VENTAS -->
+    <section class="tab-pane fade" id="tabVentas">
+      <div class="admin-card">
+        <h4 class="fw-bold mb-3">Transacciones realizadas</h4>
+
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle">
+            <thead class="table-dark">
+              <tr>
+                <th>ID venta</th>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Método</th>
+                <th>Productos</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th>Detalle</th>
+              </tr>
+            </thead>
+            <tbody id="tablaVentas"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- REPORTES -->
+    <section class="tab-pane fade" id="tabReportes">
+      <div class="admin-card">
+        <h4 class="fw-bold mb-3">Descargar reporte de ventas</h4>
+        <p class="text-muted">
+          Selecciona un periodo no mayor a seis meses para descargar un Excel con las ventas.
+        </p>
+
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label">Fecha inicio</label>
+            <input id="fechaDesde" type="date" class="form-control">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label">Fecha fin</label>
+            <input id="fechaHasta" type="date" class="form-control">
+          </div>
+
+          <div class="col-md-4 d-flex align-items-end">
+            <button class="btn btn-success w-100" onclick="descargarReporteExcel()">
+              Descargar Excel
+            </button>
+          </div>
+        </div>
+
+        <div id="mensajeReporte" class="mt-3"></div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<!-- MODAL DETALLE VENTA -->
+<div class="modal fade" id="modalDetalleVenta" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title">Detalle de venta</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <div id="contenidoDetalleVenta"></div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-primary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="bg-dark text-white text-center py-3">
+  <p class="mb-0">© 2026 NetCom</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script src="js/auth.js"></script>
+<script src="js/theme.js"></script>
+
+<script>
+  const API_ADMIN = "https://localhost:44301/api/admin";
+  let usuariosAdmin = [];
+  let graficaVentas = null;
+
+  document.addEventListener("DOMContentLoaded", async function () {
+    validarAdmin();
+    await cargarPanelAdmin();
+  });
+
+  function validarAdmin() {
+    const usuario = JSON.parse(localStorage.getItem("usuarioNetcom"));
+
+    if (!usuario || (usuario.Rol || usuario.rol) !== "admin") {
+      alert("Acceso no autorizado.");
+      window.location.href = "login.html";
+    }
+  }
+
+  function formatoPrecio(valor) {
+    return "$" + Number(valor || 0).toLocaleString("es-CO");
+  }
+
+  function formatearFecha(fecha) {
+    if (!fecha) return "Sin registro";
+
+    return new Date(fecha).toLocaleDateString("es-CO", {
+      year: "numeric",
+      month: "short",
+      day: "numeric"
+    });
+  }
+
+  function enmascararCorreo(correo) {
+    if (!correo || !correo.includes("@")) return "Correo no disponible";
+
+    const partes = correo.split("@");
+    const nombre = partes[0];
+    const dominio = partes[1];
+
+    return nombre.substring(0, 2) + "****@" + dominio;
+  }
+
+  async function cargarPanelAdmin() {
+    await cargarResumen();
+    await cargarUsuarios();
+    await cargarVentas();
+    await cargarGraficaVentas();
+  }
+
+  async function cargarResumen() {
+    const respuesta = await fetch(`${API_ADMIN}/resumen`);
+    const data = await respuesta.json();
+
+    document.getElementById("totalProductos").textContent = data.TotalProductos ?? data.totalProductos;
+    document.getElementById("productosAgotados").textContent = data.ProductosAgotados ?? data.productosAgotados;
+    document.getElementById("stockTotal").textContent = data.StockTotal ?? data.stockTotal;
+    document.getElementById("usuariosRegistrados").textContent = data.UsuariosRegistrados ?? data.usuariosRegistrados;
+    document.getElementById("ventasRealizadas").textContent = data.VentasRealizadas ?? data.ventasRealizadas;
+    document.getElementById("totalRecaudado").textContent = formatoPrecio(data.TotalRecaudado ?? data.totalRecaudado);
+  }
+
+  async function cargarUsuarios() {
+    const respuesta = await fetch(`${API_ADMIN}/usuarios`);
+    usuariosAdmin = await respuesta.json();
+
+    const tabla = document.getElementById("tablaUsuarios");
+    const select = document.getElementById("usuarioGrafica");
+
+    tabla.innerHTML = "";
+    select.innerHTML = `<option value="">Todos los usuarios</option>`;
+
+    usuariosAdmin.forEach(u => {
+      const id = u.IdUsuario ?? u.idUsuario;
+      const nombre = u.NombreCompleto ?? u.nombreCompleto;
+      const correo = u.Correo ?? u.correo;
+      const rol = u.Rol ?? u.rol;
+      const fecha = u.FechaRegistro ?? u.fechaRegistro;
+      const compras = u.ComprasRealizadas ?? u.comprasRealizadas;
+      const total = u.TotalComprado ?? u.totalComprado;
+      const ultima = u.UltimaCompra ?? u.ultimaCompra;
+
+      tabla.innerHTML += `
+        <tr>
+          <td>${id}</td>
+          <td>${nombre}</td>
+          <td>${enmascararCorreo(correo)}</td>
+          <td><span class="badge bg-secondary text-capitalize">${rol}</span></td>
+          <td>${formatearFecha(fecha)}</td>
+          <td>${compras}</td>
+          <td>${formatoPrecio(total)}</td>
+          <td>${ultima ? formatearFecha(ultima) : "Sin compras"}</td>
+        </tr>
+      `;
+
+      if (rol !== "admin") {
+        select.innerHTML += `<option value="${id}">${nombre}</option>`;
+      }
+    });
+  }
+
+  async function cargarVentas() {
+    const respuesta = await fetch(`${API_ADMIN}/ventas`);
+    const ventas = await respuesta.json();
+
+    const tabla = document.getElementById("tablaVentas");
+    tabla.innerHTML = "";
+
+    ventas.forEach(v => {
+      const idVenta = v.IdVenta ?? v.idVenta;
+      const cliente = v.Cliente ?? v.cliente;
+      const fecha = v.FechaVenta ?? v.fechaVenta;
+      const metodo = v.MetodoPago ?? v.metodoPago;
+      const cantidad = v.CantidadProductos ?? v.cantidadProductos;
+      const total = v.Total ?? v.total;
+      const estado = v.Estado ?? v.estado;
+
+      tabla.innerHTML += `
+        <tr>
+          <td>${idVenta}</td>
+          <td>${formatearFecha(fecha)}</td>
+          <td>${cliente}</td>
+          <td>${metodo}</td>
+          <td>${cantidad}</td>
+          <td>${formatoPrecio(total)}</td>
+          <td><span class="badge bg-success">${estado}</span></td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary" onclick="verDetalleVenta(${idVenta})">
+              Ver
+            </button>
+          </td>
+        </tr>
+      `;
+    });
+  }
+
+  async function verDetalleVenta(idVenta) {
+    const respuesta = await fetch(`${API_ADMIN}/ventas/${idVenta}`);
+    const detalle = await respuesta.json();
+
+    let html = `
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead class="table-dark">
+            <tr>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>Precio unitario</th>
+              <th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
+
+    detalle.forEach(d => {
+      const producto = d.Producto ?? d.producto;
+      const cantidad = d.Cantidad ?? d.cantidad;
+      const precio = d.PrecioUnitario ?? d.precioUnitario;
+      const subtotal = d.Subtotal ?? d.subtotal;
+
+      html += `
+        <tr>
+          <td>${producto}</td>
+          <td>${cantidad}</td>
+          <td>${formatoPrecio(precio)}</td>
+          <td>${formatoPrecio(subtotal)}</td>
+        </tr>
+      `;
+    });
+
+    html += `
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    document.getElementById("contenidoDetalleVenta").innerHTML = html;
+
+    const modal = new bootstrap.Modal(document.getElementById("modalDetalleVenta"));
+    modal.show();
+  }
+
+  async function cargarGraficaVentas() {
+    const idUsuario = document.getElementById("usuarioGrafica").value;
+    const url = idUsuario
+      ? `${API_ADMIN}/grafica-ventas?idUsuario=${idUsuario}`
+      : `${API_ADMIN}/grafica-ventas`;
+
+    const respuesta = await fetch(url);
+    const datos = await respuesta.json();
+
+    const etiquetas = datos.map(x => x.Etiqueta ?? x.etiqueta);
+    const ventas = datos.map(x => x.CantidadVentas ?? x.cantidadVentas);
+    const totales = datos.map(x => x.TotalVentas ?? x.totalVentas);
+
+    const ctx = document.getElementById("graficaVentas");
+
+    if (graficaVentas) {
+      graficaVentas.destroy();
+    }
+
+    graficaVentas = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: etiquetas,
+        datasets: [
+          {
+            label: "Cantidad de ventas",
+            data: ventas
+          },
+          {
+            label: "Total vendido",
+            data: totales
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: "bottom"
+          }
+        }
+      }
+    });
+  }
+
+  async function descargarReporteExcel() {
+    const desde = document.getElementById("fechaDesde").value;
+    const hasta = document.getElementById("fechaHasta").value;
+    const mensaje = document.getElementById("mensajeReporte");
+
+    mensaje.innerHTML = "";
+
+    if (!desde || !hasta) {
+      mensaje.innerHTML = `<div class="alert alert-warning">Selecciona ambas fechas.</div>`;
+      return;
+    }
+
+    const fechaDesde = new Date(desde);
+    const fechaHasta = new Date(hasta);
+
+    if (fechaDesde > fechaHasta) {
+      mensaje.innerHTML = `<div class="alert alert-danger">La fecha inicial no puede ser mayor que la fecha final.</div>`;
+      return;
+    }
+
+    const fechaMaxima = new Date(fechaDesde);
+    fechaMaxima.setMonth(fechaMaxima.getMonth() + 6);
+
+    if (fechaHasta > fechaMaxima) {
+      mensaje.innerHTML = `<div class="alert alert-danger">El rango no puede ser mayor a seis meses.</div>`;
+      return;
+    }
+
+    try {
+      const respuesta = await fetch(`${API_ADMIN}/reporte-ventas?desde=${desde}&hasta=${hasta}`);
+
+      if (!respuesta.ok) {
+        const error = await respuesta.text();
+        mensaje.innerHTML = `<div class="alert alert-danger">${error}</div>`;
+        return;
+      }
+
+      const blob = await respuesta.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const enlace = document.createElement("a");
+      enlace.href = url;
+      enlace.download = `reporte_ventas_netcom_${desde}_${hasta}.xlsx`;
+      document.body.appendChild(enlace);
+      enlace.click();
+      enlace.remove();
+
+      window.URL.revokeObjectURL(url);
+
+      mensaje.innerHTML = `<div class="alert alert-success">Reporte descargado correctamente.</div>`;
+
+    } catch (error) {
+      console.error(error);
+      mensaje.innerHTML = `<div class="alert alert-danger">Error al descargar el reporte.</div>`;
+    }
+  }
+</script>
+
+</body>
+</html>

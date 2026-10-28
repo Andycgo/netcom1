@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NetCom | Inicio</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="index.html">NetCom</a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="menu">
+      <ul class="navbar-nav ms-auto align-items-lg-center">
+        <li class="nav-item">
+          <a class="nav-link active" href="index.html">Inicio</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="productos.html">Productos</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="carrito.html">Carrito</a>
+        </li>
+
+        <li class="nav-item" id="menuCuenta">
+  <a class="nav-link" href="dashboard.html">Mi cuenta</a>
+</li>
+<li class="nav-item d-flex align-items-center ms-lg-3 my-2 my-lg-0">
+  <button id="themeToggle" class="theme-toggle" type="button">
+    <span class="theme-toggle-track">
+      <span class="theme-icon theme-sun">☀</span>
+      <span class="theme-icon theme-moon">☾</span>
+      <span class="theme-toggle-thumb"></span>
+    </span>
+  </button>
+</li>
+        <li class="nav-item" id="zonaUsuario"></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO PRINCIPAL -->
+<header class="home-hero">
+  <div class="container">
+    <div class="row align-items-center min-vh-75">
+      <div class="col-lg-6 text-white">
+        <span class="badge bg-primary mb-3 px-3 py-2">Tecnología nueva y usada</span>
+
+        <h1 class="display-4 fw-bold">
+          Compra y vende tecnología en NetCom
+        </h1>
+
+        <p class="lead mt-3">
+          Encuentra portátiles, teléfonos, consolas y accesorios tecnológicos en una plataforma moderna, segura y fácil de usar.
+        </p>
+
+        <div class="search-wrapper mt-4 shadow">
+  <div class="input-group input-group-lg">
+    <input 
+      id="buscarInicio" 
+      type="text" 
+      class="form-control" 
+      placeholder="Buscar MacBook, iPhone, PS5, ASUS..."
+      autocomplete="off"
+    >
+
+    <button id="btnBuscarInicio" class="btn btn-primary">
+      Buscar
+    </button>
+  </div>
+
+  <div id="sugerenciasBusqueda" class="search-suggestions"></div>
+</div>
+
+        <div class="d-flex gap-3 mt-4 flex-wrap">
+          <a href="productos.html" class="btn btn-primary btn-lg">
+            Comprar ahora
+          </a>
+
+
+        </div>
+      </div>
+
+      <div class="col-lg-6 mt-5 mt-lg-0">
+        <div class="hero-image-card">
+          <img 
+            src="img/home/hero-tech.jpg" 
+            alt="Tecnología NetCom" 
+            class="img-fluid rounded-4 shadow-lg"
+            onerror="this.src='https://via.placeholder.com/700x450?text=NetCom+Technology'">
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- CATEGORÍAS -->
+<section class="container my-5">
+  <div class="section-header text-center mb-4">
+    <h2 class="fw-bold">Explora por categoría</h2>
+    <p class="text-muted">Encuentra rápidamente el tipo de tecnología que necesitas.</p>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="category-card" onclick="irCategoria('portatiles')">
+        <img 
+          src="img/categorias/portatiles.jpg" 
+          alt="Portátiles"
+          onerror="this.src='https://via.placeholder.com/500x300?text=Portatiles'">
+        <div class="category-overlay">
+          <h4>Portátiles</h4>
+          <p>Equipos para estudio, trabajo y gaming.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="category-card" onclick="irCategoria('telefonos')">
+        <img 
+          src="img/categorias/telefonos.jpg" 
+          alt="Teléfonos"
+          onerror="this.src='https://via.placeholder.com/500x300?text=Telefonos'">
+        <div class="category-overlay">
+          <h4>Teléfonos</h4>
+          <p>Smartphones nuevos y usados.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="category-card" onclick="irCategoria('consolas')">
+        <img 
+          src="img/categorias/consolas.jpg" 
+          alt="Consolas"
+          onerror="this.src='https://via.placeholder.com/500x300?text=Consolas'">
+        <div class="category-overlay">
+          <h4>Consolas</h4>
+          <p>PlayStation, Xbox, Nintendo y más.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCTOS MÁS NUEVOS -->
+<section class="container my-5">
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+      <h2 class="fw-bold mb-1">Productos más nuevos</h2>
+      <p class="text-muted mb-0">Últimos productos agregados a NetCom.</p>
+    </div>
+
+    <a href="productos.html" class="btn btn-outline-primary">
+      Ver catálogo completo
+    </a>
+  </div>
+
+  <div id="productosNuevos" class="row g-4"></div>
+</section>
+
+<!-- OFERTAS DESTACADAS -->
+<section class="offers-section py-5">
+  <div class="container">
+    <div class="row align-items-center g-4">
+      <div class="col-lg-5">
+        <span class="badge bg-warning text-dark mb-3">Ofertas destacadas</span>
+        <h2 class="fw-bold text-white">Encuentra tecnología al mejor precio</h2>
+        <p class="text-white-50">
+          Revisa productos con buena disponibilidad, precios competitivos y categorías populares.
+        </p>
+
+        <a href="productos.html" class="btn btn-primary">
+          Ver ofertas
+        </a>
+      </div>
+
+      <div class="col-lg-7">
+        <div id="ofertasDestacadas" class="row g-3"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCTOS POPULARES -->
+<section class="container my-5">
+  <div class="section-header text-center mb-4">
+    <h2 class="fw-bold">Más buscados en NetCom</h2>
+    <p class="text-muted">Productos tecnológicos destacados por categoría y disponibilidad.</p>
+  </div>
+
+  <div id="productosPopulares" class="row g-4"></div>
+</section>
+
+<!-- BLOQUE DE CONFIANZA -->
+<section class="container my-5">
+  <div class="trust-box shadow-sm">
+    <div class="row text-center g-4">
+      <div class="col-md-3">
+        <div class="trust-icon">🔒</div>
+        <h5>Compra segura</h5>
+        <p class="text-muted small">Procesos protegidos y usuarios registrados.</p>
+      </div>
+
+      <div class="col-md-3">
+        <div class="trust-icon">📦</div>
+        <h5>Productos verificados</h5>
+        <p class="text-muted small">Información clara de precio, stock y categoría.</p>
+      </div>
+
+      <div class="col-md-3">
+        <div class="trust-icon">💳</div>
+        <h5>Pagos en Colombia</h5>
+        <p class="text-muted small">Nequi, Daviplata, PSE, tarjeta y contraentrega.</p>
+      </div>
+
+      <div class="col-md-3">
+        <div class="trust-icon">👤</div>
+        <h5>Atención al cliente</h5>
+        <p class="text-muted small">Soporte para consultar productos, compras y disponibilidad.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- FOOTER -->
+<footer class="bg-dark text-white pt-5 pb-3">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-md-4">
+        <h4 class="fw-bold">NetCom</h4>
+        <p class="text-white-50">
+          Tienda tecnológica para consultar, comprar y gestionar productos de tecnología.
+        </p>
+      </div>
+
+      <div class="col-md-2">
+        <h6>Menú</h6>
+        <ul class="list-unstyled">
+          <li><a class="footer-link" href="index.html">Inicio</a></li>
+          <li><a class="footer-link" href="productos.html">Productos</a></li>
+          <li><a class="footer-link" href="carrito.html">Carrito</a></li>
+        </ul>
+      </div>
+
+      <div class="col-md-3">
+        <h6>Categorías</h6>
+        <ul class="list-unstyled">
+          <li><a class="footer-link" href="productos.html?categoria=portatiles">Portátiles</a></li>
+          <li><a class="footer-link" href="productos.html?categoria=telefonos">Teléfonos</a></li>
+          <li><a class="footer-link" href="productos.html?categoria=consolas">Consolas</a></li>
+        </ul>
+      </div>
+
+      <div class="col-md-3">
+        <h6>Soporte</h6>
+        <p class="text-white-50 small mb-1">Correo: soporte@netcom.com</p>
+        <p class="text-white-50 small mb-0">Bogotá, Colombia</p>
+      </div>
+    </div>
+
+    <hr class="border-secondary">
+
+    <p class="text-center text-white-50 mb-0">
+      © 2026 NetCom - Plataforma de compra y venta de tecnología
+    </p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="js/auth.js"></script>
+<script src="js/session.js"></script>
+<script src="js/products.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", async function () {
+    validarVistaCliente();
+    configurarBusquedaInicio();
+    await cargarHomeProductos();
+  });
+
+  function validarVistaCliente() {
+    const usuario = JSON.parse(localStorage.getItem("usuarioNetcom"));
+
+    if (usuario) {
+      const rol = usuario.Rol || usuario.rol;
+
+      if (rol === "admin") {
+        window.location.href = "admin.html";
+      }
+    }
+  }
+
+function configurarBusquedaInicio() {
+  const input = document.getElementById("buscarInicio");
+  const boton = document.getElementById("btnBuscarInicio");
+  const sugerencias = document.getElementById("sugerenciasBusqueda");
+
+  boton.addEventListener("click", function () {
+    const busqueda = input.value.trim();
+
+    if (busqueda === "") {
+      window.location.href = "productos.html";
+    } else {
+      window.location.href = "productos.html?buscar=" + encodeURIComponent(busqueda);
+    }
+  });
+
+  input.addEventListener("input", function () {
+    const texto = input.value.toLowerCase().trim();
+
+    if (texto.length < 2) {
+      sugerencias.style.display = "none";
+      sugerencias.innerHTML = "";
+      return;
+    }
+
+    const resultados = products
+      .filter(p => {
+        const nombre = obtenerNombre(p).toLowerCase();
+        const descripcion = obtenerDescripcion(p).toLowerCase();
+        const categoria = obtenerCategoria(p).toLowerCase();
+        const marca = (p.Marca || p.marca || "").toLowerCase();
+        const stock = obtenerStock(p);
+
+        return stock > 0 && (
+          nombre.includes(texto) ||
+          descripcion.includes(texto) ||
+          categoria.includes(texto) ||
+          marca.includes(texto)
+        );
+      })
+      .slice(0, 6);
+
+    if (resultados.length === 0) {
+      sugerencias.innerHTML = `
+        <div class="search-no-results">
+          No se encontraron productos disponibles.
+        </div>
+      `;
+      sugerencias.style.display = "block";
+      return;
+    }
+
+    sugerencias.innerHTML = resultados.map(p => {
+      const nombre = obtenerNombre(p);
+      const categoria = obtenerCategoria(p);
+      const precio = obtenerPrecio(p);
+      const stock = obtenerStock(p);
+      const imagen = imagenProducto(p);
+
+      return `
+        <div class="search-suggestion-item" onclick="seleccionarSugerencia('${nombre.replace(/'/g, "\\'")}')">
+          <img 
+            src="${imagen}" 
+            alt="${nombre}"
+            onerror="this.src='https://via.placeholder.com/100x80?text=Producto'"
+          >
+
+          <div class="search-suggestion-info">
+            <h6>${nombre}</h6>
+            <small>${categoria} | ${formatoPrecio(precio)} | Stock: ${stock}</small>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    sugerencias.style.display = "block";
+  });
+
+  input.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+      boton.click();
+    }
+
+    if (e.key === "Escape") {
+      sugerencias.style.display = "none";
+    }
+  });
+
+  document.addEventListener("click", function (e) {
+    if (!e.target.closest(".search-wrapper")) {
+      sugerencias.style.display = "none";
+    }
+  });
+}
+
+function seleccionarSugerencia(nombreProducto) {
+  window.location.href = "productos.html?buscar=" + encodeURIComponent(nombreProducto);
+}
+  function irCategoria(categoria) {
+    window.location.href = "productos.html?categoria=" + categoria;
+  }
+
+  async function cargarHomeProductos() {
+    if (typeof cargarProductosDesdeAPI === "function") {
+      await cargarProductosDesdeAPI();
+    }
+
+    if (!products || products.length === 0) {
+      document.getElementById("productosNuevos").innerHTML = `
+        <div class="col-12">
+          <div class="alert alert-warning">
+            No hay productos disponibles para mostrar.
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    pintarProductosNuevos();
+    pintarOfertasDestacadas();
+    pintarProductosPopulares();
+  }
+
+  function obtenerId(p) {
+    return p.IdProducto || p.idProducto || p.id;
+  }
+
+  function obtenerNombre(p) {
+    return p.NombreProducto || p.nombreProducto || p.name;
+  }
+
+  function obtenerDescripcion(p) {
+    return p.Descripcion || p.descripcion || p.description || "";
+  }
+
+  function obtenerPrecio(p) {
+    return p.Precio || p.precio || p.price || 0;
+  }
+
+  function obtenerStock(p) {
+    return p.Stock ?? p.stock ?? 0;
+  }
+
+  function obtenerCategoria(p) {
+    return p.NombreCategoria || p.nombreCategoria || p.category || "Sin categoría";
+  }
+
+  function obtenerFecha(p) {
+    return p.FechaPublicacion || p.fechaPublicacion || p.date || "2000-01-01";
+  }
+
+  function imagenProducto(p) {
+    if (typeof obtenerImagenProducto === "function") {
+      return obtenerImagenProducto(p);
+    }
+
+    return p.Imagen || p.imagen || p.image || "https://via.placeholder.com/400x250?text=Producto";
+  }
+
+  function crearCardProducto(p, etiqueta = "") {
+    const id = obtenerId(p);
+    const nombre = obtenerNombre(p);
+    const descripcion = obtenerDescripcion(p);
+    const precio = obtenerPrecio(p);
+    const stock = obtenerStock(p);
+    const categoria = obtenerCategoria(p);
+    const imagen = imagenProducto(p);
+    const agotado = stock <= 0;
+
+    return `
+      <div class="col-md-4 col-lg-3">
+        <div class="card h-100 product-card shadow-sm">
+          <div class="position-relative">
+            <img 
+              src="${imagen}" 
+              class="card-img-top" 
+              alt="${nombre}"
+              onerror="this.src='https://via.placeholder.com/400x250?text=Sin+Imagen'">
+
+            ${etiqueta ? `<span class="badge bg-primary product-badge">${etiqueta}</span>` : ""}
+          </div>
+
+          <div class="card-body d-flex flex-column">
+            <span class="badge bg-secondary mb-2">${categoria}</span>
+
+            <h5>${nombre}</h5>
+
+            <p class="text-muted small">${descripcion}</p>
+
+            <p class="small mb-1">
+              <strong>Stock:</strong> ${stock}
+            </p>
+
+            ${agotado ? `<p class="text-danger fw-bold">Producto agotado</p>` : ""}
+
+            <h5 class="text-primary mt-auto">${formatoPrecio(precio)}</h5>
+
+            ${
+              agotado
+              ? `<button class="btn btn-danger w-100 mt-2" disabled>Agotado</button>`
+              : `<button class="btn btn-primary w-100 mt-2" onclick="agregarCarrito(${id})">Agregar al carrito</button>`
+            }
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function pintarProductosNuevos() {
+    const productosNuevos = [...products]
+      .sort((a, b) => new Date(obtenerFecha(b)) - new Date(obtenerFecha(a)))
+      .slice(0, 8);
+
+    document.getElementById("productosNuevos").innerHTML =
+      productosNuevos.map(p => crearCardProducto(p, "Nuevo")).join("");
+  }
+
+  function pintarOfertasDestacadas() {
+    const ofertas = [...products]
+      .filter(p => obtenerStock(p) > 0)
+      .slice(0, 4);
+
+    document.getElementById("ofertasDestacadas").innerHTML =
+      ofertas.map(p => `
+        <div class="col-md-6">
+          <div class="offer-card">
+            <h5>${obtenerNombre(p)}</h5>
+            <p class="small mb-1">${obtenerCategoria(p)}</p>
+            <strong>${formatoPrecio(obtenerPrecio(p))}</strong>
+          </div>
+        </div>
+      `).join("");
+  }
+
+  function pintarProductosPopulares() {
+    const populares = [...products]
+      .filter(p => obtenerStock(p) > 0)
+      .slice(4, 8);
+
+    document.getElementById("productosPopulares").innerHTML =
+      populares.map(p => crearCardProducto(p, "Popular")).join("");
+  }
+</script>
+<script src="js/theme.js"></script>
+</body>
+</html>

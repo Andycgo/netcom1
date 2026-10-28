@@ -1,0 +1,26 @@
+# Visual Studio
+.vs/
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+*.user
+*.suo
+*.cache
+*.log
+
+# Paquetes generados
+packages/
+
+# Archivos temporales
+*.tmp
+*.bak
+
+# Secretos y configuración local
+.env
+appsettings.Development.json
+secrets.json
+
+# Archivos del sistema
+Thumbs.db
+.DS_Store
